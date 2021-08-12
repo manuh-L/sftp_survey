@@ -1,0 +1,65 @@
+---
+
+- name: SFTP
+  hosts: all
+#  vars_files:
+#    - inputs.yml
+  become: true
+  become_user: root
+
+ 
+  tasks:
+  
+    - name: Ensure groups exists
+      ansible.builtin.group:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - local-sftp
+        - sftp-no_mediation
+        - sftp-shares-with-mediation
+  
+    - name: Create sftp users
+      user:
+        name: "{{ username }}"
+        groups: "sftp-share-with-mediation"
+        shell:  "/sbin/nologin"
+        comment: "{{ comment }}"
+        password: "Password1"
+        update_password: on_create
+        append: yes
+
+#    - name: Set 365 maximum expiration date for password
+#      user:
+#        name: "{{item.name}}"
+#        password_expire_max: 365
+#      with_items: "{{ sftp_users }}"
+
+    - name: Create a directory for sftp users if it does not exist
+      file:
+        path: "{{sftp_chroot_directory}}/{{ item.name }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      with_items: "{{ sftp_users}}"
+
+    - name: Creating SFTP dir for Jail 
+      file:
+        path: "{{sftp_chroot_directory}}/{{ item.group }}/{{ item.name }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: u=rwx,g+rwxs
+      with_items:
+        - "{{ sftp_folders }}"
+
+#    - name: home dir for sftp users
+#      file:
+#        path: /sftp_home/group_shares/sftp-mediation/{{ item.name }}/{{ item.folder2 }}
+#        state: directory
+#        owner: "{{ item.sftp_owner  }}"
+#        group: "{{ item.name }}"
+#        mode: u=rwx,g+rwxs,o-rwx
+#      with_items:
+#        - "{{ sftp_users }}"
