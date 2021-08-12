@@ -25,7 +25,7 @@
         groups: "sftp-shares-with-mediation"
         shell:  "/sbin/nologin"
         comment: "{{ comment }}"
-        password: "Password1"
+        password: "{{ 'Password1' | password_hash('sha512') }}"
         update_password: on_create
         append: yes
       when: mediation_flow == "yes"
@@ -37,7 +37,7 @@
         groups: "local-sftp"
         shell:  "/sbin/nologin"
         comment: "{{ comment }}"
-        password: "Password1"
+        password: "{{ 'Password1' | password_hash('sha512') }}"
         update_password: on_create
         append: yes
       when: mediation_flow == "no"
