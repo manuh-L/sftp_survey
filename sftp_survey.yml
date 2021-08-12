@@ -19,7 +19,7 @@
         - sftp-no_mediation
         - sftp-shares-with-mediation
   
-    - name: Create sftp users
+    - name: Create sftp user with mediation flow
       user:
         name: "{{ username }}"
         groups: "sftp-share-with-mediation"
@@ -28,6 +28,20 @@
         password: "Password1"
         update_password: on_create
         append: yes
+      when: mediation_flow == "yes"
+
+
+    - name: Create sftp user without mediation
+      user:
+        name: "{{ username }}"
+        groups: "local-sftp"
+        shell:  "/sbin/nologin"
+        comment: "{{ comment }}"
+        password: "Password1"
+        update_password: on_create
+        append: yes
+      when: mediation_flow == "no"
+
 
 #    - name: Set 365 maximum expiration date for password
 #      user:
@@ -35,24 +49,42 @@
 #        password_expire_max: 365
 #      with_items: "{{ sftp_users }}"
 
-    - name: Create a directory for sftp users if it does not exist
+    - name: Create a directory for sftp users if it does not exist (Mediation Flow)
       file:
-        path: "{{sftp_chroot_directory}}/{{ item.name }}"
+        path: "/sftp_home/group_shares/sftp-shares-with-mediation/{{ username }}"
         state: directory
         mode: '0755'
         owner: root
         group: root
-      with_items: "{{ sftp_users}}"
+      when: mediation_flow == "yes"
+
+
+    - name: Create a directory for sftp users if it does not exist
+      file:
+        path: "/sftp_home/group_shares/{{ username }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      when: mediation_flow == "no"
 
     - name: Creating SFTP dir for Jail 
       file:
-        path: "{{sftp_chroot_directory}}/{{ item.group }}/{{ item.name }}"
+        path: "/sftp_home/group_shares/sftp-shares-with-mediation/{{ username }}/{{ folders }}"
         state: directory
-        owner: "{{ item.owner }}"
-        group: "{{ item.group }}"
+        owner: "sftp-shares-with-mediation"
+        group: "{{ username }}"
         mode: u=rwx,g+rwxs
-      with_items:
-        - "{{ sftp_folders }}"
+      when: mediation_flow == "yes"
+
+    - name: Creating SFTP dir for Jail (No Mediation)
+      file:
+        path: "/sftp_home/group_shares/{{ username }}/{{ folders }}"
+        state: directory
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: u=rwx,g+rwxs
+      when: mediation_flow == "no"
 
 #    - name: home dir for sftp users
 #      file:
