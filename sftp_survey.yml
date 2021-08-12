@@ -74,7 +74,7 @@
         state: directory
         owner: "sftp-shares-with-mediation"
         group: "{{ username }}"
-        mode: u=rwx,g+rwxs
+        mode: u=rwx,g+rwxs,o-rwx
       with_items:
         - "{{ folders }}"      
       when: mediation_flow == "yes"
@@ -85,7 +85,7 @@
         state: directory
         owner: "{{ username }}"
         group: "{{ username }}"
-        mode: u=rwx,g+rwxs
+        mode: u=rwx,g+rwxs,o-rwx
       with_items:
         - "{{ folders }}"
       when: mediation_flow == "no"
