@@ -70,7 +70,7 @@
 
     - name: Creating SFTP dir for Jail 
       file:
-        path: "/sftp_home/group_shares/sftp-shares-with-mediation/{{ username }}/{{ folders }}"
+        path: /sftp_home/group_shares/sftp-shares-with-mediation/{{ username }}/{{ folders }}
         state: directory
         owner: "sftp-shares-with-mediation"
         group: "{{ username }}"
@@ -79,11 +79,13 @@
 
     - name: Creating SFTP dir for Jail (No Mediation)
       file:
-        path: /sftp_home/group_shares/{{ username }}/{{ folders }}
+        path: /sftp_home/group_shares/{{ username }}/{{ item }}
         state: directory
         owner: "{{ username }}"
         group: "{{ username }}"
         mode: u=rwx,g+rwxs
+      with_items:
+        - "{{ folders }}"
       when: mediation_flow == "no"
 
 #    - name: home dir for sftp users
