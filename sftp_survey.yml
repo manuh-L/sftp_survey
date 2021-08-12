@@ -79,7 +79,7 @@
 
     - name: Creating SFTP dir for Jail (No Mediation)
       file:
-        path: "/sftp_home/group_shares/{{ username }}/{{ folders }}"
+        path: /sftp_home/group_shares/{{ username }}/{{ folders }}
         state: directory
         owner: "{{ username }}"
         group: "{{ username }}"
