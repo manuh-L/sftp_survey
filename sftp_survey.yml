@@ -22,7 +22,7 @@
     - name: Create sftp user with mediation flow
       user:
         name: "{{ username }}"
-        groups: "sftp-share-with-mediation"
+        groups: "sftp-shares-with-mediation"
         shell:  "/sbin/nologin"
         comment: "{{ comment }}"
         password: "Password1"
