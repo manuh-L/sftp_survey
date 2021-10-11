@@ -15,8 +15,7 @@
         name: "{{ item }}"
         state: present
       loop:
-        - local-sftp
-        - sftp-no_mediation
+        - local-sftp-users
         - sftp-shares-with-mediation
   
     - name: Create sftp user with mediation flow
@@ -34,7 +33,7 @@
     - name: Create sftp user without mediation
       user:
         name: "{{ username }}"
-        groups: "local-sftp"
+        groups: "local-sftp-users"
         shell:  "/sbin/nologin"
         comment: "{{ comment }}"
         password: "{{ 'Password1' | password_hash('sha512') }}"
@@ -51,7 +50,7 @@
 
     - name: Create a directory for sftp users if it does not exist (Mediation Flow)
       file:
-        path: "/sftp_home/group_shares/sftp-shares-with-mediation/{{ username }}"
+        path: "/sftp_home/group_shares/sftp-mediation/{{ username }}"
         state: directory
         mode: '0755'
         owner: root
@@ -70,9 +69,9 @@
 
     - name: Creating SFTP dir for Jail 
       file:
-        path: /sftp_home/group_shares/sftp-shares-with-mediation/{{ username }}/{{ item }}
+        path: /sftp_home/group_shares/sftp-mediation/{{ username }}/{{ item }}
         state: directory
-        owner: "sftp-shares-with-mediation"
+        owner: "sftp-mediation"
         group: "{{ username }}"
         mode: u=rwx,g+rwxs,o-rwx
       with_items:
@@ -83,19 +82,9 @@
       file:
         path: /sftp_home/group_shares/{{ username }}/{{ item }}
         state: directory
-        owner: "{{ username }}"
+        owner: root
         group: "{{ username }}"
         mode: u=rwx,g+rwxs,o-rwx
       with_items:
         - "{{ folders }}"
       when: mediation_flow == "no"
-
-#    - name: home dir for sftp users
-#      file:
-#        path: /sftp_home/group_shares/sftp-mediation/{{ item.name }}/{{ item.folder2 }}
-#        state: directory
-#        owner: "{{ item.sftp_owner  }}"
-#        group: "{{ item.name }}"
-#        mode: u=rwx,g+rwxs,o-rwx
-#      with_items:
-#        - "{{ sftp_users }}"
